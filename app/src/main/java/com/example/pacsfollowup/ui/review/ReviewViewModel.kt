@@ -70,6 +70,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
 
     fun startRecording() {
         if (_isRecording.value) return
+        _findings.value = ""  // 기존 소견 초기화
         speechRecorder.start(viewModelScope)
         _isRecording.value = true
     }
