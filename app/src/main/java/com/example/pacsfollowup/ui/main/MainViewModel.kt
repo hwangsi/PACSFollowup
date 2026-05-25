@@ -1,9 +1,9 @@
 package com.example.pacsfollowup.ui.main
 
 import android.app.Application
-import android.content.Context
 import androidx.lifecycle.AndroidViewModel
 import com.example.pacsfollowup.data.model.PatientRecord
+import com.example.pacsfollowup.data.security.EncryptedPrefs
 import com.google.gson.Gson
 import com.google.gson.reflect.TypeToken
 import kotlinx.coroutines.flow.MutableStateFlow
@@ -13,12 +13,12 @@ import kotlinx.coroutines.flow.asStateFlow
 class MainViewModel(application: Application) : AndroidViewModel(application) {
 
     companion object {
-        private const val PREFS_NAME = "pacs_prefs"
+        private const val PREFS_NAME = "pacs_prefs_secure"
         private const val KEY_RECORDS = "recent_records"
         private const val MAX_RECORDS = 20
     }
 
-    private val prefs = application.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+    private val prefs = EncryptedPrefs.create(application, PREFS_NAME)
     private val gson = Gson()
 
     private val _records = MutableStateFlow<List<PatientRecord>>(emptyList())

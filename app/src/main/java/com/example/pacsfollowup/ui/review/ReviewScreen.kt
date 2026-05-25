@@ -94,13 +94,51 @@ fun ReviewScreen(
     var showSheetDialog by remember { mutableStateOf(false) }
     var sheetIdInput by remember { mutableStateOf("") }
 
+    // 비식별화 확인 다이얼로그
+    var showConsentDialog by remember { mutableStateOf(false) }
+
     fun attemptSave() {
         if (viewModel.spreadsheetId.isEmpty()) {
             sheetIdInput = ""
             showSheetDialog = true
             return
         }
-        viewModel.saveRecord(onSaved)
+        showConsentDialog = true
+    }
+
+    if (showConsentDialog) {
+        AlertDialog(
+            onDismissRequest = { showConsentDialog = false },
+            title = { Text("환자정보 보호 확인") },
+            text = {
+                Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
+                    Text(
+                        "Google Sheets로 전송하기 전에 다음을 확인해주세요:",
+                        style = MaterialTheme.typography.bodyMedium
+                    )
+                    Text(
+                        "• 환자명·주민번호 등 직접 식별자가 포함되어 있지 않은지\n" +
+                        "• 환자 ID가 기관의 비식별화/가명화 규정을 준수했는지\n" +
+                        "• IRB 또는 업무 규정상 외부 클라우드 전송이 허용되는지",
+                        style = MaterialTheme.typography.bodySmall
+                    )
+                    Text(
+                        "확인 후에도 책임은 입력자에게 있습니다.",
+                        style = MaterialTheme.typography.labelSmall,
+                        color = MaterialTheme.colorScheme.error
+                    )
+                }
+            },
+            confirmButton = {
+                TextButton(onClick = {
+                    showConsentDialog = false
+                    viewModel.saveRecord(onSaved)
+                }) { Text("확인 후 저장") }
+            },
+            dismissButton = {
+                TextButton(onClick = { showConsentDialog = false }) { Text("취소") }
+            }
+        )
     }
 
     if (showSheetDialog) {
@@ -231,6 +269,13 @@ fun ReviewScreen(
 
             // 소견 입력 섹션
             Text("판독 소견", style = MaterialTheme.typography.titleSmall)
+
+            Text(
+                "⚠️ 음성 입력 시 환자명·환자번호 등 식별정보를 말하지 마세요. " +
+                "녹음은 Google Cloud로 전송됩니다.",
+                style = MaterialTheme.typography.labelSmall,
+                color = MaterialTheme.colorScheme.error
+            )
 
             Row(
                 verticalAlignment = Alignment.CenterVertically,
