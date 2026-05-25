@@ -54,6 +54,8 @@ gradle.properties 에 SPEECH_API_KEY 추가
 - API 키는 로컬에서만 관리
 - 로컬 캐시(환자 ID·소견 최근 20건, Spreadsheet ID)는 **EncryptedSharedPreferences(AES-256)** 로 저장
 - `android:allowBackup="false"` 로 ADB/Auto Backup 경로 차단
+- **Sheets B열(환자 ID)** 은 Android Keystore의 비공개 AES-256-GCM 키로 암호화되어 저장됩니다.
+  키는 단말 하드웨어 저장소에서 추출 불가하며, 해당 단말의 앱 내에서만 복호화 가능합니다.
 - **외부 전송 데이터** (Google STT, Google Sheets)는 사용자의 동의 다이얼로그 이후 전송됨
 - 음성 입력 시 환자명·환자번호 등 직접 식별자를 발화하지 마세요 (앱 내 경고 표시)
 - 실 환경 적용 전에 IRB / DPIA / 위탁계약(BAA/DPA) 검토 필수

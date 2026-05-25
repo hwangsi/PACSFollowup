@@ -3,6 +3,7 @@ package com.example.pacsfollowup.data.repository
 import android.content.Context
 import com.example.pacsfollowup.data.model.PatientRecord
 import com.example.pacsfollowup.data.security.EncryptedPrefs
+import com.example.pacsfollowup.data.security.PatientIdCipher
 import com.google.api.client.googleapis.auth.oauth2.GoogleCredential
 import com.google.api.client.http.javanet.NetHttpTransport
 import com.google.api.client.json.gson.GsonFactory
@@ -49,7 +50,7 @@ class SheetsRepository(private val context: Context) {
                 .format(DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss"))
             val row: List<Any> = listOf(
                 record.date,
-                record.patientId,
+                PatientIdCipher.encrypt(record.patientId),
                 record.examName,
                 record.findings,
                 savedAt
