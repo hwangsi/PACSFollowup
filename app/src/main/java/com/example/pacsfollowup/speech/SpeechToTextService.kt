@@ -27,7 +27,7 @@ class SpeechToTextService {
                     put("config", JSONObject().apply {
                         put("encoding", "LINEAR16")
                         put("sampleRateHertz", SpeechRecorder.SAMPLE_RATE)
-                        put("languageCode", "en-US")
+                        put("languageCode", "ko-KR")
                         put("enableAutomaticPunctuation", true)
                         put("model", "medical_dictation")
                     })
