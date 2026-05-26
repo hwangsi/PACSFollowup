@@ -82,15 +82,15 @@ fun CameraScreen(
         Box(modifier = Modifier.fillMaxSize(), contentAlignment = Alignment.Center) {
             AlertDialog(
                 onDismissRequest = onBack,
-                title = { Text("카메라 권한 필요") },
-                text = { Text("PACS 화면 촬영을 위해 카메라 권한이 필요합니다.") },
+                title = { Text("Camera Permission Required") },
+                text = { Text("Camera permission is required to capture PACS screens.") },
                 confirmButton = {
                     Button(onClick = { permissionLauncher.launch(Manifest.permission.CAMERA) }) {
-                        Text("권한 허용")
+                        Text("Allow")
                     }
                 },
                 dismissButton = {
-                    Button(onClick = onBack) { Text("취소") }
+                    Button(onClick = onBack) { Text("Cancel") }
                 }
             )
         }
@@ -145,10 +145,10 @@ fun CameraScreen(
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(onClick = onBack) {
-                Icon(Icons.Default.ArrowBack, contentDescription = "뒤로", tint = Color.White)
+                Icon(Icons.Default.ArrowBack, contentDescription = "Back", tint = Color.White)
             }
             Text(
-                text = "PACS 화면 촬영",
+                text = "Capture PACS Screen",
                 color = Color.White,
                 style = MaterialTheme.typography.titleMedium
             )
@@ -179,7 +179,7 @@ fun CameraScreen(
         ) {
             Icon(
                 imageVector = Icons.Default.Camera,
-                contentDescription = "촬영",
+                contentDescription = "Capture",
                 modifier = Modifier.size(36.dp),
                 tint = Color.Black
             )

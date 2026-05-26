@@ -1,0 +1,10 @@
+{
+  "permissions": {
+    "allow": [
+      "PowerShell(git clone *)",
+      "PowerShell(git clone https://github.com/hwangsi/PACSFollowup \"$env:TEMP\\\\PACSFollowup_tmp\" 2>&1)",
+      "PowerShell(Get-ChildItem *)",
+      "PowerShell(Rename-Item *)"
+    ]
+  }
+}

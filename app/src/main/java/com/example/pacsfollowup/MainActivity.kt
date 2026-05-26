@@ -46,16 +46,16 @@ class MainActivity : ComponentActivity() {
                     if (showRationale) {
                         AlertDialog(
                             onDismissRequest = { showRationale = false },
-                            title = { Text("권한 필요") },
-                            text = { Text("카메라와 마이크 권한이 필요합니다.\n설정에서 권한을 허용해주세요.") },
+                            title = { Text("Permissions Required") },
+                            text = { Text("Camera and microphone permissions are required.\nPlease allow permissions in settings.") },
                             confirmButton = {
                                 TextButton(onClick = {
                                     permissionLauncher.launch(requiredPermissions)
                                     showRationale = false
-                                }) { Text("다시 요청") }
+                                }) { Text("Request Again") }
                             },
                             dismissButton = {
-                                TextButton(onClick = { finish() }) { Text("종료") }
+                                TextButton(onClick = { finish() }) { Text("Exit") }
                             }
                         )
                     }

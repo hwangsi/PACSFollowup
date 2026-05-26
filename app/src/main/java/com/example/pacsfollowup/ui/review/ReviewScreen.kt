@@ -90,11 +90,8 @@ fun ReviewScreen(
         }
     }
 
-    // Spreadsheet ID 다이얼로그
     var showSheetDialog by remember { mutableStateOf(false) }
     var sheetIdInput by remember { mutableStateOf("") }
-
-    // 비식별화 확인 다이얼로그
     var showConsentDialog by remember { mutableStateOf(false) }
 
     fun attemptSave() {
@@ -109,21 +106,21 @@ fun ReviewScreen(
     if (showConsentDialog) {
         AlertDialog(
             onDismissRequest = { showConsentDialog = false },
-            title = { Text("환자정보 보호 확인") },
+            title = { Text("Patient Data Protection") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "Google Sheets로 전송하기 전에 다음을 확인해주세요:",
+                        "Please confirm the following before sending to Google Sheets:",
                         style = MaterialTheme.typography.bodyMedium
                     )
                     Text(
-                        "• 환자명·주민번호 등 직접 식별자가 포함되어 있지 않은지\n" +
-                        "• 환자 ID가 기관의 비식별화/가명화 규정을 준수했는지\n" +
-                        "• IRB 또는 업무 규정상 외부 클라우드 전송이 허용되는지",
+                        "• No direct identifiers (name, SSN, etc.) are included\n" +
+                        "• Patient ID complies with your institution's de-identification policy\n" +
+                        "• External cloud transfer is permitted by IRB or institutional policy",
                         style = MaterialTheme.typography.bodySmall
                     )
                     Text(
-                        "확인 후에도 책임은 입력자에게 있습니다.",
+                        "Responsibility remains with the user even after confirmation.",
                         style = MaterialTheme.typography.labelSmall,
                         color = MaterialTheme.colorScheme.error
                     )
@@ -133,16 +130,15 @@ fun ReviewScreen(
                 TextButton(onClick = {
                     showConsentDialog = false
                     viewModel.saveRecord(onSaved)
-                }) { Text("확인 후 저장") }
+                }) { Text("Confirm & Save") }
             },
             dismissButton = {
-                TextButton(onClick = { showConsentDialog = false }) { Text("취소") }
+                TextButton(onClick = { showConsentDialog = false }) { Text("Cancel") }
             }
         )
     }
 
     if (showSheetDialog) {
-        // URL 전체 붙여넣기 시 ID 자동 추출
         val extractedId = extractSpreadsheetId(sheetIdInput.trim())
         val isValidInput = extractedId.isNotBlank()
 
@@ -152,24 +148,23 @@ fun ReviewScreen(
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "URL 전체 또는 ID만 붙여넣기 하세요",
+                        "Paste the full URL or just the ID",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
                     OutlinedTextField(
                         value = sheetIdInput,
                         onValueChange = { sheetIdInput = it },
-                        label = { Text("Sheets URL 또는 ID") },
+                        label = { Text("Sheets URL or ID") },
                         placeholder = { Text("https://docs.google.com/spreadsheets/d/...") },
                         singleLine = false,
                         maxLines = 3,
                         modifier = Modifier.fillMaxWidth()
                     )
-                    // 추출된 ID 미리보기
                     if (sheetIdInput.isNotBlank()) {
                         Text(
                             text = if (isValidInput) "✅ ID: $extractedId"
-                                   else "⚠️ 올바른 Sheets URL 또는 ID를 입력하세요",
+                                   else "⚠️ Enter a valid Sheets URL or ID",
                             style = MaterialTheme.typography.labelSmall,
                             color = if (isValidInput) MaterialTheme.colorScheme.primary
                                     else MaterialTheme.colorScheme.error
@@ -185,10 +180,10 @@ fun ReviewScreen(
                         attemptSave()
                     },
                     enabled = isValidInput
-                ) { Text("확인") }
+                ) { Text("Confirm") }
             },
             dismissButton = {
-                TextButton(onClick = { showSheetDialog = false }) { Text("취소") }
+                TextButton(onClick = { showSheetDialog = false }) { Text("Cancel") }
             }
         )
     }
@@ -196,10 +191,10 @@ fun ReviewScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("판독 소견 입력") },
+                title = { Text("Enter Findings") },
                 navigationIcon = {
                     IconButton(onClick = onBack) {
-                        Icon(Icons.Default.ArrowBack, contentDescription = "뒤로")
+                        Icon(Icons.Default.ArrowBack, contentDescription = "Back")
                     }
                 },
                 actions = {
@@ -207,7 +202,7 @@ fun ReviewScreen(
                         sheetIdInput = viewModel.spreadsheetId
                         showSheetDialog = true
                     }) {
-                        Icon(Icons.Default.Settings, contentDescription = "Sheets 설정")
+                        Icon(Icons.Default.Settings, contentDescription = "Sheets Settings")
                     }
                 },
                 colors = TopAppBarDefaults.topAppBarColors(
@@ -225,12 +220,11 @@ fun ReviewScreen(
                 .padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(12.dp)
         ) {
-            // 촬영 이미지 미리보기
             capturedBitmap?.let { bitmap ->
                 Card(modifier = Modifier.fillMaxWidth()) {
                     Image(
                         bitmap = bitmap.asImageBitmap(),
-                        contentDescription = "촬영 이미지",
+                        contentDescription = "Captured Image",
                         modifier = Modifier
                             .fillMaxWidth()
                             .height(200.dp)
@@ -240,24 +234,22 @@ fun ReviewScreen(
                 }
             }
 
-            // OCR 처리 중 표시
             if (isProcessingOcr) {
                 Row(
                     verticalAlignment = Alignment.CenterVertically,
                     horizontalArrangement = Arrangement.spacedBy(8.dp)
                 ) {
                     CircularProgressIndicator(modifier = Modifier.size(18.dp), strokeWidth = 2.dp)
-                    Text("OCR 분석 중...", style = MaterialTheme.typography.bodySmall)
+                    Text("Analyzing...", style = MaterialTheme.typography.bodySmall)
                 }
             }
 
-            // 기본 정보 섹션
-            Text("기본 정보", style = MaterialTheme.typography.titleSmall)
+            Text("Patient Info", style = MaterialTheme.typography.titleSmall)
 
             OutlinedTextField(
                 value = patientId,
                 onValueChange = viewModel::updatePatientId,
-                label = { Text("환자 ID") },
+                label = { Text("Patient ID") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Default.Person, contentDescription = null) }
@@ -266,7 +258,7 @@ fun ReviewScreen(
             OutlinedTextField(
                 value = date,
                 onValueChange = viewModel::updateDate,
-                label = { Text("날짜") },
+                label = { Text("Date") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Default.CalendarToday, contentDescription = null) }
@@ -275,7 +267,7 @@ fun ReviewScreen(
             OutlinedTextField(
                 value = examName,
                 onValueChange = viewModel::updateExamName,
-                label = { Text("영상검사명") },
+                label = { Text("Exam") },
                 modifier = Modifier.fillMaxWidth(),
                 singleLine = true,
                 leadingIcon = { Icon(Icons.Default.MedicalServices, contentDescription = null) }
@@ -283,12 +275,10 @@ fun ReviewScreen(
 
             HorizontalDivider()
 
-            // 소견 입력 섹션
-            Text("판독 소견", style = MaterialTheme.typography.titleSmall)
+            Text("Findings", style = MaterialTheme.typography.titleSmall)
 
             Text(
-                "⚠️ 음성 입력 시 환자명·환자번호 등 식별정보를 말하지 마세요. " +
-                "녹음은 Google Cloud로 전송됩니다.",
+                "⚠️ Do not say patient names or IDs during voice input. Audio is sent to Google Cloud.",
                 style = MaterialTheme.typography.labelSmall,
                 color = MaterialTheme.colorScheme.error
             )
@@ -314,7 +304,7 @@ fun ReviewScreen(
                         contentDescription = null
                     )
                     Spacer(Modifier.width(4.dp))
-                    Text(if (isRecording) "녹음 중지" else "음성 녹음")
+                    Text(if (isRecording) "Stop Recording" else "Record Voice")
                 }
 
                 when {
@@ -328,7 +318,7 @@ fun ReviewScreen(
                         horizontalArrangement = Arrangement.spacedBy(4.dp)
                     ) {
                         CircularProgressIndicator(modifier = Modifier.size(14.dp), strokeWidth = 2.dp)
-                        Text("변환 중...", style = MaterialTheme.typography.labelMedium)
+                        Text("Transcribing...", style = MaterialTheme.typography.labelMedium)
                     }
                 }
             }
@@ -336,17 +326,16 @@ fun ReviewScreen(
             OutlinedTextField(
                 value = findings,
                 onValueChange = viewModel::updateFindings,
-                label = { Text("소견") },
+                label = { Text("Findings") },
                 modifier = Modifier
                     .fillMaxWidth()
                     .heightIn(min = 140.dp),
                 maxLines = 8,
-                placeholder = { Text("음성 녹음 후 자동 입력되거나 직접 입력하세요") }
+                placeholder = { Text("Auto-filled after voice recording, or type manually") }
             )
 
             Spacer(Modifier.height(4.dp))
 
-            // 저장 버튼
             Button(
                 onClick = { attemptSave() },
                 modifier = Modifier.fillMaxWidth(),
@@ -359,11 +348,11 @@ fun ReviewScreen(
                         color = MaterialTheme.colorScheme.onPrimary
                     )
                     Spacer(Modifier.width(8.dp))
-                    Text("저장 중...")
+                    Text("Saving...")
                 } else {
                     Icon(Icons.Default.CloudUpload, contentDescription = null)
                     Spacer(Modifier.width(8.dp))
-                    Text("Google Sheets에 저장")
+                    Text("Save to Google Sheets")
                 }
             }
 
@@ -373,14 +362,12 @@ fun ReviewScreen(
 }
 
 /**
- * URL 전체 또는 ID만 입력해도 Spreadsheet ID 추출
- * 예) https://docs.google.com/spreadsheets/d/ABC123/edit#gid=0  →  ABC123
- *     ABC123  →  ABC123
+ * Extracts Spreadsheet ID from a full URL or returns the input if already an ID.
+ * e.g. https://docs.google.com/spreadsheets/d/ABC123/edit  →  ABC123
  */
 private fun extractSpreadsheetId(input: String): String {
     val urlPattern = Regex("""/spreadsheets/d/([a-zA-Z0-9\-_]+)""")
     val match = urlPattern.find(input)
     if (match != null) return match.groupValues[1]
-    // URL이 아닌 경우 ID 직접 입력으로 간주 (영문·숫자·하이픈·언더스코어)
     return if (input.matches(Regex("[a-zA-Z0-9\\-_]+"))) input else ""
 }

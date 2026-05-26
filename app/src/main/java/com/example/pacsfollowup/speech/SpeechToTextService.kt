@@ -27,20 +27,23 @@ class SpeechToTextService {
                     put("config", JSONObject().apply {
                         put("encoding", "LINEAR16")
                         put("sampleRateHertz", SpeechRecorder.SAMPLE_RATE)
-                        put("languageCode", "ko-KR")
+                        put("languageCode", "en-US")
                         put("enableAutomaticPunctuation", true)
-                        // model 미지정 시 ko-KR 기본 모델 사용 (latest_long은 짧은 발화 미지원)
+                        put("model", "medical_dictation")
                         put("speechContexts", JSONArray().apply {
                             put(JSONObject().apply {
                                 put("phrases", JSONArray().apply {
-                                    // 영상의학 자주 쓰는 용어 힌트
+                                    // Radiology / urology terminology hints
                                     listOf(
-                                        "전립선", "신장", "방광", "요관", "부신",
-                                        "고환", "난소", "자궁", "골반", "복부",
-                                        "CT", "MRI", "초음파", "PET", "X-ray",
-                                        "결절", "종괴", "낭종", "석회화", "혈종",
-                                        "추적 관찰", "이상 없음", "정상 범위",
-                                        "크기 증가", "크기 감소", "변화 없음"
+                                        "prostate", "kidney", "bladder", "ureter", "urethra",
+                                        "adrenal", "testis", "ovary", "uterus", "cervix",
+                                        "pelvis", "abdomen", "retroperitoneum",
+                                        "CT", "MRI", "ultrasound", "PET", "X-ray",
+                                        "nodule", "mass", "cyst", "calcification", "hematoma",
+                                        "follow-up", "no abnormality", "within normal limits",
+                                        "increase in size", "decrease in size", "unchanged",
+                                        "heterogeneous", "homogeneous", "enhancement",
+                                        "lymphadenopathy", "hydronephrosis", "hydroureter"
                                     ).forEach { put(it) }
                                 })
                                 put("boost", 15)

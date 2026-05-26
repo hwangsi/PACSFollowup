@@ -49,7 +49,7 @@ fun MainScreen(
     Scaffold(
         topBar = {
             TopAppBar(
-                title = { Text("PACS 추적 관리") },
+                title = { Text("PACS Follow-up") },
                 colors = TopAppBarDefaults.topAppBarColors(
                     containerColor = MaterialTheme.colorScheme.primaryContainer
                 )
@@ -59,7 +59,7 @@ fun MainScreen(
             ExtendedFloatingActionButton(
                 onClick = onNavigateToCamera,
                 icon = { Icon(Icons.Default.CameraAlt, contentDescription = null) },
-                text = { Text("PACS 촬영") }
+                text = { Text("Capture PACS") }
             )
         }
     ) { padding ->
@@ -81,12 +81,12 @@ fun MainScreen(
                         tint = MaterialTheme.colorScheme.outline
                     )
                     Text(
-                        text = "저장된 판독 기록이 없습니다",
+                        text = "No records found",
                         style = MaterialTheme.typography.bodyLarge,
                         color = MaterialTheme.colorScheme.outline
                     )
                     Text(
-                        text = "하단 버튼으로 PACS 화면을 촬영하세요",
+                        text = "Tap the button below to capture a PACS screen",
                         style = MaterialTheme.typography.bodyMedium,
                         color = MaterialTheme.colorScheme.outline
                     )
@@ -116,7 +116,7 @@ private fun maskPatientId(id: String): String =
 private fun RecordCard(record: PatientRecord) {
     var revealed by remember { mutableStateOf(false) }
 
-    // 3초 후 자동 마스킹
+    // Auto-hide after 3 seconds
     LaunchedEffect(revealed) {
         if (revealed) {
             delay(3_000)
@@ -125,7 +125,7 @@ private fun RecordCard(record: PatientRecord) {
     }
 
     val displayId = when {
-        record.patientId.isEmpty() -> "환자 ID 없음"
+        record.patientId.isEmpty() -> "No Patient ID"
         revealed -> record.patientId
         else -> maskPatientId(record.patientId)
     }
@@ -172,7 +172,7 @@ private fun RecordCard(record: PatientRecord) {
             }
             if (record.savedAt.isNotEmpty()) {
                 Text(
-                    text = "저장: ${record.savedAt}",
+                    text = "Saved: ${record.savedAt}",
                     style = MaterialTheme.typography.labelSmall,
                     color = MaterialTheme.colorScheme.outline
                 )
