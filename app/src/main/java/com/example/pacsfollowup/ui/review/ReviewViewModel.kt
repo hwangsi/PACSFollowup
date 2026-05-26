@@ -61,7 +61,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                 _date.value = result.date
                 _examName.value = result.examName
             } catch (e: Exception) {
-                _errorMessage.value = "OCR 오류: ${e.message}"
+                _errorMessage.value = "OCR error: ${e.message}"
             } finally {
                 _isProcessingOcr.value = false
             }
@@ -82,10 +82,17 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             val audio = speechRecorder.stop()
             if (audio.isEmpty()) return@launch
 
+            // 최소 1초 미만(32000 bytes = 16kHz × 2byte × 1ch × 1sec)이면 안내
+            val minBytes = SpeechRecorder.SAMPLE_RATE * 2 * 1
+            if (audio.size < minBytes) {
+                _errorMessage.value = "Recording too short. Please speak for at least 1 second."
+                return@launch
+            }
+
             _isTranscribing.value = true
             val apiKey = BuildConfig.SPEECH_API_KEY
             if (apiKey.isEmpty()) {
-                _errorMessage.value = "SPEECH_API_KEY가 설정되지 않았습니다\ngradle.properties에 키를 추가해주세요"
+                _errorMessage.value = "SPEECH_API_KEY is not set.\nAdd the key to gradle.properties."
                 _isTranscribing.value = false
                 return@launch
             }
@@ -96,10 +103,10 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
                         _findings.value = if (_findings.value.isEmpty()) trimmed
                                           else "${_findings.value} $trimmed"
                     } else {
-                        _errorMessage.value = "음성이 인식되지 않았습니다. 다시 시도해주세요."
+                        _errorMessage.value = "No speech detected. Please try again."
                     }
                 }
-                .onFailure { _errorMessage.value = "음성 인식 오류: ${it.message}" }
+                .onFailure { _errorMessage.value = "Speech recognition error: ${it.message}" }
             _isTranscribing.value = false
         }
     }
@@ -122,7 +129,7 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             )
             sheetsRepository.appendRecord(record)
                 .onSuccess { onSuccess(record) }
-                .onFailure { _errorMessage.value = "저장 실패: ${it.message}" }
+                .onFailure { _errorMessage.value = "Save failed: ${it.message}" }
             _isSaving.value = false
         }
     }

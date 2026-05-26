@@ -17,3 +17,10 @@ local.properties
 # API Keys & Secrets
 gradle.properties
 app/src/main/assets/service_account.json
+
+# IDE & Tools
+.idea/
+.claude/
+
+# Heap dumps
+*.hprof

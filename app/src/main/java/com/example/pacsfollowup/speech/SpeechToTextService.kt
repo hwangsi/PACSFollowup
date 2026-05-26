@@ -30,6 +30,25 @@ class SpeechToTextService {
                         put("languageCode", "en-US")
                         put("enableAutomaticPunctuation", true)
                         put("model", "medical_dictation")
+                        put("speechContexts", JSONArray().apply {
+                            put(JSONObject().apply {
+                                put("phrases", JSONArray().apply {
+                                    // Radiology / urology terminology hints
+                                    listOf(
+                                        "prostate", "kidney", "bladder", "ureter", "urethra",
+                                        "adrenal", "testis", "ovary", "uterus", "cervix",
+                                        "pelvis", "abdomen", "retroperitoneum",
+                                        "CT", "MRI", "ultrasound", "PET", "X-ray",
+                                        "nodule", "mass", "cyst", "calcification", "hematoma",
+                                        "follow-up", "no abnormality", "within normal limits",
+                                        "increase in size", "decrease in size", "unchanged",
+                                        "heterogeneous", "homogeneous", "enhancement",
+                                        "lymphadenopathy", "hydronephrosis", "hydroureter"
+                                    ).forEach { put(it) }
+                                })
+                                put("boost", 15)
+                            })
+                        })
                     })
                     put("audio", JSONObject().apply {
                         put("content", audioBase64)
