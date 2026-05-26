@@ -1,65 +1,92 @@
-# PACS Followup App
+# PACS Follow-up App
 
-> ⚠️ **PHI 경고 / Test environment only**
-> 본 앱은 **개발·검증용 데모**입니다. 실제 환자 식별정보(PHI; 이름, 주민번호, 환자번호, 생년월일 등)를
-> 입력·녹음·전송하지 마십시오. 실 임상 사용 전에는 소속 기관의 IRB·정보보호·보안 부서의 검토와
-> 비식별화(De-identification) 절차가 반드시 선행되어야 합니다.
-> 본 저장소의 어떤 코드도 의료기기 인허가를 받지 않았습니다.
+> ⚠️ **PHI Warning / Test environment only**
+> This app is a **development/validation demo**. Do NOT input, record, or transmit actual patient identifiers (PHI: name, SSN, patient ID, date of birth, etc.).
+> Before clinical use, a review by your institution's IRB, privacy, and security department and a de-identification procedure are mandatory.
+> No code in this repository has received medical device approval.
 
-PACS 화면을 촬영하여 추적 관찰이 필요한 환자 정보를 자동으로 추출하고 Google Sheets에 저장하는 Android 앱입니다.
+An Android app that captures PACS screens, automatically extracts patient information via OCR, records dictated findings via voice, and saves everything to Google Sheets.
 
-## 주요 기능
+---
 
-- 📷 **카메라 촬영**: PACS 화면을 직접 촬영
-- 🔍 **OCR 자동 인식**: 환자 ID, 날짜, 영상검사명 자동 추출 (Google ML Kit)
-- 🎤 **음성 소견 입력**: 음성 녹음 후 자동 텍스트 변환 (Google Cloud Speech-to-Text)
-- 📊 **Google Sheets 연동**: 판독 소견 자동 저장
-- 🏥 **비뇨생식계 특화**: 전립선, 신장, 방광 등 검사명 자동 인식
+## Features
 
-## 기술 스택
+- 📷 **Camera Capture** — Photograph PACS screens directly
+- 🔍 **OCR Auto-extraction** — Patient ID, date, and exam name extracted automatically (Google ML Kit)
+- 🎤 **Voice Dictation** — Record findings in English; auto-converted to text (Google Cloud Speech-to-Text, `medical_dictation` model)
+- 📊 **Google Sheets Integration** — Findings saved automatically via Service Account
+- 🏥 **Radiology/Urology focused** — Prostate, kidney, bladder and other exam names recognized
+- 🔒 **Patient ID masking** — IDs masked in the record list; tap to reveal for 3 seconds
+- 🔎 **Search** — Real-time filtering by Patient ID, exam, date, or findings
+- 🗑️ **Delete** — Swipe left or tap the trash icon to delete a record (with confirmation)
 
-- **언어**: Kotlin
-- **UI**: Jetpack Compose
-- **OCR**: Google ML Kit Text Recognition v2
-- **STT**: Google Cloud Speech-to-Text API (medical_dictation 모델)
-- **Storage**: Google Sheets API v4 (Service Account)
-- **Camera**: CameraX
-- **Local persistence**: EncryptedSharedPreferences (AES-256 GCM)
+---
 
-## 데이터 구조 (Google Sheets)
+## Tech Stack
 
-| A: 날짜 | B: 환자ID | C: 영상검사명 | D: 소견 | E: 입력시각 |
-|--------|---------|------------|--------|-----------|
+| Category | Technology |
+|----------|-----------|
+| Language | Kotlin |
+| UI | Jetpack Compose + Material 3 |
+| OCR | Google ML Kit Text Recognition v2 (Korean + Latin) |
+| STT | Google Cloud Speech-to-Text API (`medical_dictation`, `en-US`) |
+| Storage | Google Sheets API v4 (Service Account) |
+| Camera | CameraX |
+| Local Storage | EncryptedSharedPreferences (AES-256-GCM) |
+| Encryption | Android Keystore AES-256-GCM (Patient ID) |
 
-## 설정 방법
+---
+
+## Google Sheets Data Structure
+
+| A: Date | B: Patient ID (encrypted) | C: Exam | D: Findings | E: Saved At |
+|---------|--------------------------|---------|-------------|-------------|
+
+---
+
+## Setup
 
 ### 1. Google Cloud Console
-- Cloud Speech-to-Text API 활성화
-- Google Sheets API 활성화
-- Service Account 생성 후 JSON 키 다운로드
+- Enable **Cloud Speech-to-Text API**
+- Enable **Google Sheets API**
+- Create a **Service Account** and download the JSON key
 
-### 2. 파일 설정
-app/src/main/assets/service_account.json  ← 서비스 계정 키
-gradle.properties 에 SPEECH_API_KEY 추가
+### 2. File Configuration
+```
+app/src/main/assets/service_account.json   ← Service Account key (never commit)
+gradle.properties                          ← Add SPEECH_API_KEY (never commit)
+```
+
+`gradle.properties` format:
+```properties
+SPEECH_API_KEY=your_api_key_here
+```
 
 ### 3. Google Sheets
-- 새 스프레드시트 생성
-- 서비스 계정 이메일을 편집자로 공유
-- 앱 설정(⚙️)에서 Spreadsheet ID 입력
+1. Create a new spreadsheet
+2. Share it with the service account email (found in `client_email` field of the JSON) as **Editor**
+3. In the app, tap ⚙️ and paste the full Sheets URL or just the Spreadsheet ID
 
-## 보안 / 개인정보 처리
+> **Tip**: You can paste the full URL (`https://docs.google.com/spreadsheets/d/.../edit`) — the app extracts the ID automatically.
 
-- `service_account.json` 은 절대 GitHub에 업로드 금지
-- `gradle.properties` 는 `.gitignore` 에 포함됨
-- API 키는 로컬에서만 관리
-- 로컬 캐시(환자 ID·소견 최근 20건, Spreadsheet ID)는 **EncryptedSharedPreferences(AES-256)** 로 저장
-- `android:allowBackup="false"` 로 ADB/Auto Backup 경로 차단
-- **Sheets B열(환자 ID)** 은 Android Keystore의 비공개 AES-256-GCM 키로 암호화되어 저장됩니다.
-  키는 단말 하드웨어 저장소에서 추출 불가하며, 해당 단말의 앱 내에서만 복호화 가능합니다.
-- **외부 전송 데이터** (Google STT, Google Sheets)는 사용자의 동의 다이얼로그 이후 전송됨
-- 음성 입력 시 환자명·환자번호 등 직접 식별자를 발화하지 마세요 (앱 내 경고 표시)
-- 실 환경 적용 전에 IRB / DPIA / 위탁계약(BAA/DPA) 검토 필수
+---
 
-## 개발자
+## Security
 
-- 황성일 (분당서울대학교병원 영상의학과)
+| Item | Measure |
+|------|---------|
+| `service_account.json` | Never commit — listed in `.gitignore` |
+| `gradle.properties` | Never commit — listed in `.gitignore` |
+| Local records cache (20 records, Spreadsheet ID) | **EncryptedSharedPreferences** (AES-256-GCM) |
+| Patient ID column in Sheets | **Android Keystore AES-256-GCM** — key is hardware-bound to the device |
+| ADB/Auto Backup | Blocked via `android:allowBackup="false"` |
+| External data transmission | Consent dialog shown before every save |
+| Voice input warning | In-app warning not to speak patient names or IDs |
+
+> Before production use, review IRB / DPIA / data processing agreements (BAA/DPA).
+
+---
+
+## Developer
+
+- Sung-il Hwang, Department of Radiology, Seoul National University Bundang Hospital
