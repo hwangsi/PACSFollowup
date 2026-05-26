@@ -29,7 +29,23 @@ class SpeechToTextService {
                         put("sampleRateHertz", SpeechRecorder.SAMPLE_RATE)
                         put("languageCode", "ko-KR")
                         put("enableAutomaticPunctuation", true)
-                        put("model", "latest_long")
+                        // model 미지정 시 ko-KR 기본 모델 사용 (latest_long은 짧은 발화 미지원)
+                        put("speechContexts", JSONArray().apply {
+                            put(JSONObject().apply {
+                                put("phrases", JSONArray().apply {
+                                    // 영상의학 자주 쓰는 용어 힌트
+                                    listOf(
+                                        "전립선", "신장", "방광", "요관", "부신",
+                                        "고환", "난소", "자궁", "골반", "복부",
+                                        "CT", "MRI", "초음파", "PET", "X-ray",
+                                        "결절", "종괴", "낭종", "석회화", "혈종",
+                                        "추적 관찰", "이상 없음", "정상 범위",
+                                        "크기 증가", "크기 감소", "변화 없음"
+                                    ).forEach { add(it) }
+                                })
+                                put("boost", 15)
+                            })
+                        })
                     })
                     put("audio", JSONObject().apply {
                         put("content", audioBase64)

@@ -82,6 +82,13 @@ class ReviewViewModel(application: Application) : AndroidViewModel(application) 
             val audio = speechRecorder.stop()
             if (audio.isEmpty()) return@launch
 
+            // 최소 1초 미만(32000 bytes = 16kHz × 2byte × 1ch × 1sec)이면 안내
+            val minBytes = SpeechRecorder.SAMPLE_RATE * 2 * 1
+            if (audio.size < minBytes) {
+                _errorMessage.value = "녹음 시간이 너무 짧습니다. 1초 이상 말씀해주세요."
+                return@launch
+            }
+
             _isTranscribing.value = true
             val apiKey = BuildConfig.SPEECH_API_KEY
             if (apiKey.isEmpty()) {
