@@ -142,33 +142,49 @@ fun ReviewScreen(
     }
 
     if (showSheetDialog) {
+        // URL 전체 붙여넣기 시 ID 자동 추출
+        val extractedId = extractSpreadsheetId(sheetIdInput.trim())
+        val isValidInput = extractedId.isNotBlank()
+
         AlertDialog(
             onDismissRequest = { showSheetDialog = false },
             title = { Text("Google Spreadsheet ID") },
             text = {
                 Column(verticalArrangement = Arrangement.spacedBy(8.dp)) {
                     Text(
-                        "Sheets URL에서 /d/ 와 /edit 사이의 ID를 입력하세요",
+                        "URL 전체 또는 ID만 붙여넣기 하세요",
                         style = MaterialTheme.typography.bodySmall,
                         color = MaterialTheme.colorScheme.outline
                     )
                     OutlinedTextField(
                         value = sheetIdInput,
                         onValueChange = { sheetIdInput = it },
-                        label = { Text("Spreadsheet ID") },
-                        singleLine = true,
+                        label = { Text("Sheets URL 또는 ID") },
+                        placeholder = { Text("https://docs.google.com/spreadsheets/d/...") },
+                        singleLine = false,
+                        maxLines = 3,
                         modifier = Modifier.fillMaxWidth()
                     )
+                    // 추출된 ID 미리보기
+                    if (sheetIdInput.isNotBlank()) {
+                        Text(
+                            text = if (isValidInput) "✅ ID: $extractedId"
+                                   else "⚠️ 올바른 Sheets URL 또는 ID를 입력하세요",
+                            style = MaterialTheme.typography.labelSmall,
+                            color = if (isValidInput) MaterialTheme.colorScheme.primary
+                                    else MaterialTheme.colorScheme.error
+                        )
+                    }
                 }
             },
             confirmButton = {
                 TextButton(
                     onClick = {
-                        viewModel.setSpreadsheetId(sheetIdInput.trim())
+                        viewModel.setSpreadsheetId(extractedId)
                         showSheetDialog = false
                         attemptSave()
                     },
-                    enabled = sheetIdInput.isNotBlank()
+                    enabled = isValidInput
                 ) { Text("확인") }
             },
             dismissButton = {
@@ -354,4 +370,17 @@ fun ReviewScreen(
             Spacer(Modifier.height(16.dp))
         }
     }
+}
+
+/**
+ * URL 전체 또는 ID만 입력해도 Spreadsheet ID 추출
+ * 예) https://docs.google.com/spreadsheets/d/ABC123/edit#gid=0  →  ABC123
+ *     ABC123  →  ABC123
+ */
+private fun extractSpreadsheetId(input: String): String {
+    val urlPattern = Regex("""/spreadsheets/d/([a-zA-Z0-9\-_]+)""")
+    val match = urlPattern.find(input)
+    if (match != null) return match.groupValues[1]
+    // URL이 아닌 경우 ID 직접 입력으로 간주 (영문·숫자·하이픈·언더스코어)
+    return if (input.matches(Regex("[a-zA-Z0-9\\-_]+"))) input else ""
 }
