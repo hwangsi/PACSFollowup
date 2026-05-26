@@ -25,13 +25,18 @@ import androidx.compose.material3.Text
 import androidx.compose.material3.TopAppBar
 import androidx.compose.material3.TopAppBarDefaults
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
 import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import com.example.pacsfollowup.data.model.PatientRecord
+import kotlinx.coroutines.delay
 
 @OptIn(ExperimentalMaterial3Api::class)
 @Composable
@@ -103,9 +108,32 @@ fun MainScreen(
     }
 }
 
+private fun maskPatientId(id: String): String =
+    if (id.length > 3) id.take(3) + "****" else "****"
+
+@OptIn(ExperimentalMaterial3Api::class)
 @Composable
 private fun RecordCard(record: PatientRecord) {
-    Card(modifier = Modifier.fillMaxWidth()) {
+    var revealed by remember { mutableStateOf(false) }
+
+    // 3초 후 자동 마스킹
+    LaunchedEffect(revealed) {
+        if (revealed) {
+            delay(3_000)
+            revealed = false
+        }
+    }
+
+    val displayId = when {
+        record.patientId.isEmpty() -> "환자 ID 없음"
+        revealed -> record.patientId
+        else -> maskPatientId(record.patientId)
+    }
+
+    Card(
+        modifier = Modifier.fillMaxWidth(),
+        onClick = { if (record.patientId.isNotEmpty()) revealed = !revealed }
+    ) {
         Column(
             modifier = Modifier.padding(16.dp),
             verticalArrangement = Arrangement.spacedBy(4.dp)
@@ -116,9 +144,11 @@ private fun RecordCard(record: PatientRecord) {
                 verticalAlignment = Alignment.CenterVertically
             ) {
                 Text(
-                    text = record.patientId.ifEmpty { "환자 ID 없음" },
+                    text = displayId,
                     style = MaterialTheme.typography.titleMedium,
-                    fontWeight = FontWeight.Bold
+                    fontWeight = FontWeight.Bold,
+                    color = if (revealed) MaterialTheme.colorScheme.primary
+                            else MaterialTheme.colorScheme.onSurface
                 )
                 Text(
                     text = record.date,

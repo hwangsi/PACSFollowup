@@ -1,21 +1,36 @@
-# Add project specific ProGuard rules here.
-# You can control the set of applied configuration files using the
-# proguardFiles setting in build.gradle.
-#
-# For more details, see
-#   http://developer.android.com/guide/developing/tools/proguard.html
+# ──────────────────────────────────────────
+# PatientRecord - Gson 직렬화 보존
+# ──────────────────────────────────────────
+-keep class com.example.pacsfollowup.data.model.** { *; }
 
-# If your project uses WebView with JS, uncomment the following
-# and specify the fully qualified class name to the JavaScript interface
-# class:
-#-keepclassmembers class fqcn.of.javascript.interface.for.webview {
-#   public *;
-#}
+# ──────────────────────────────────────────
+# Gson
+# ──────────────────────────────────────────
+-keepattributes Signature
+-keepattributes *Annotation*
+-dontwarn sun.misc.**
+-keep class com.google.gson.** { *; }
+-keep class * implements com.google.gson.TypeAdapterFactory
+-keep class * implements com.google.gson.JsonSerializer
+-keep class * implements com.google.gson.JsonDeserializer
 
-# Uncomment this to preserve the line number information for
-# debugging stack traces.
-#-keepattributes SourceFile,LineNumberTable
+# ──────────────────────────────────────────
+# Google API Client (Sheets API, HTTP)
+# ──────────────────────────────────────────
+-keep class com.google.api.** { *; }
+-keep class com.google.apis.** { *; }
+-keep class com.google.auth.** { *; }
+-dontwarn com.google.api.**
+-dontwarn com.google.apis.**
 
-# If you keep the line number information, uncomment this to
-# hide the original source file name.
-#-renamesourcefileattribute SourceFile
+# ──────────────────────────────────────────
+# OkHttp (자체 consumer rules 있으나 명시)
+# ──────────────────────────────────────────
+-dontwarn okhttp3.**
+-dontwarn okio.**
+
+# ──────────────────────────────────────────
+# 스택 트레이스 가독성 유지
+# ──────────────────────────────────────────
+-keepattributes SourceFile,LineNumberTable
+-renamesourcefileattribute SourceFile
