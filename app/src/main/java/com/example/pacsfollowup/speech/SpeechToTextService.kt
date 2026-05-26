@@ -41,7 +41,7 @@ class SpeechToTextService {
                                         "결절", "종괴", "낭종", "석회화", "혈종",
                                         "추적 관찰", "이상 없음", "정상 범위",
                                         "크기 증가", "크기 감소", "변화 없음"
-                                    ).forEach { add(it) }
+                                    ).forEach { put(it) }
                                 })
                                 put("boost", 15)
                             })
