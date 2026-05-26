@@ -29,7 +29,7 @@ class SpeechToTextService {
                         put("sampleRateHertz", SpeechRecorder.SAMPLE_RATE)
                         put("languageCode", "ko-KR")
                         put("enableAutomaticPunctuation", true)
-                        put("model", "medical_dictation")
+                        put("model", "latest_long")
                     })
                     put("audio", JSONObject().apply {
                         put("content", audioBase64)
